@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class RestClient {
 
     public RestClient() {
         this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(2))
                 .build();
     }
 
@@ -40,6 +42,26 @@ public class RestClient {
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Error calling " + url, e);
+        }
+    }
+
+    public int getStatus(String url) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(2))
+                .GET()
+                .build();
+
+        try {
+            HttpResponse<Void> response = httpClient.send(
+                    request,
+                    HttpResponse.BodyHandlers.discarding()
+            );
+
+            return response.statusCode();
+
+        } catch (IOException | InterruptedException e) {
+            return -1;
         }
     }
 }
