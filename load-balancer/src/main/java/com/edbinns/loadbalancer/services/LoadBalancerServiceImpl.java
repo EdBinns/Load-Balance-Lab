@@ -39,8 +39,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             "Unknown load balancing strategy: " + properties.getStrategy()
         );
 }
-        var server = strategy.selectServer(serverRegistry.getServers());
-        var api = server.url() + "/hello";
+        var server = strategy.selectServer(serverRegistry.getHealthyServers());
+        var api = server.getUrl() + "/hello";
         
         return restClient.get(api);
     

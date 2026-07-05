@@ -8,9 +8,12 @@ loadbalancer:
   servers:
   - name: A
     url: http://localhost:8081
+    isHealthy: false
 
   - name: B
     url: http://localhost:8082
+    isHealthy: false
 
   - name: C
     url: http://localhost:8083
+    isHealthy: false

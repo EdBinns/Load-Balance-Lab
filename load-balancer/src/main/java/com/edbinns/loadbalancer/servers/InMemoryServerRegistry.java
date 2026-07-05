@@ -19,4 +19,18 @@ public class InMemoryServerRegistry implements ServerRegistry {
     public List<ServerInstance> getServers() {
         return properties.getServers();
     }
+
+    @SuppressWarnings("null")
+    @Override
+    public List<ServerInstance> getHealthyServers() {
+        return properties.getServers().stream()
+                .filter(ServerInstance::isHealthy)
+                .toList();
+    }
+
+    @Override
+    public void updateHealth(ServerInstance server, boolean healthy) {
+        server.setHealthy(healthy);
+        server.setLastHealthCheck(java.time.Instant.now());
+    }
 }

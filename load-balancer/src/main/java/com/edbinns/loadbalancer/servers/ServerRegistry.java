@@ -7,5 +7,8 @@ import com.edbinns.loadbalancer.models.ServerInstance;
 public interface ServerRegistry {
 
     List<ServerInstance> getServers();
+    List<ServerInstance> getHealthyServers();
+
+    void updateHealth(ServerInstance server, boolean healthy);
 
 }
