@@ -1,3 +1,5 @@
 spring:
   application:
     name: load-balancer
+loadbalancer:
+  strategy: random
