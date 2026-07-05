@@ -17,7 +17,7 @@ public class LoadBalancerController {
     }
 
     @GetMapping("/hello")
-    public Map<String, String> hello() {
+    public Map<String, String> hello() throws InterruptedException {
         return Map.of("message", loadBalancerService.forwardRequest());
     }
 

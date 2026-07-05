@@ -8,12 +8,12 @@ loadbalancer:
   servers:
   - name: A
     url: http://localhost:8081
-    isHealthy: false
+    weight: 2
 
   - name: B
     url: http://localhost:8082
-    isHealthy: false
+    weight: 1
 
   - name: C
     url: http://localhost:8083
-    isHealthy: false
+    weight: 2

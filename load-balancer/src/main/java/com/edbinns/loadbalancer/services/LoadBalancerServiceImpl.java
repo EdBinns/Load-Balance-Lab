@@ -30,7 +30,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
         
     @Override
-    public String forwardRequest() {
+    public String forwardRequest() throws InterruptedException {
 
         var strategy = strategies.get(properties.getStrategy());
 
@@ -38,11 +38,19 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         throw new IllegalArgumentException(
             "Unknown load balancing strategy: " + properties.getStrategy()
         );
-}
+        }
         var server = strategy.selectServer(serverRegistry.getHealthyServers());
+
+        System.out.println("Selected server: " + server.getName() + " with URL: " + server.getUrl());
+        server.incrementConnections();
         var api = server.getUrl() + "/hello";
         
-        return restClient.get(api);
+        try {
+            Thread.sleep(5000);
+            return restClient.get(api);
+        } finally {
+             server.decrementConnections();
+        }
     
     }
 
