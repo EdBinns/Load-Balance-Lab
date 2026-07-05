@@ -16,6 +16,14 @@ public class RandomStrategy implements LoadBalancingStrategy {
             throw new IllegalArgumentException("Server list is empty");
         }
         var randomIndex = new Random().nextInt(servers.size());
-        return servers.get(randomIndex);
+
+        var selected = servers.get(randomIndex);
+         System.out.printf(
+        ">>> Selected: %s (%d active connections)%n",
+        selected.getName(),
+        selected.getActiveConnections()
+        );
+
+        return selected;
     }
 }

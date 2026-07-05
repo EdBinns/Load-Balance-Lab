@@ -1,18 +1,22 @@
 package com.edbinns.loadbalancer.servers;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.stereotype.Service;
 
 import com.edbinns.loadbalancer.config.LoadBalancerProperties;
 import com.edbinns.loadbalancer.models.ServerInstance;
+import com.edbinns.loadbalancer.strategy.LoadBalancingStrategy;
 
 @Service
 public class InMemoryServerRegistry implements ServerRegistry {
     private final LoadBalancerProperties properties;
+    private final ReentrantLock lock;
 
     public InMemoryServerRegistry(LoadBalancerProperties properties) {
         this.properties = properties;
+        this.lock = new ReentrantLock();
     }
 
     @Override
@@ -32,5 +36,24 @@ public class InMemoryServerRegistry implements ServerRegistry {
     public void updateHealth(ServerInstance server, boolean healthy) {
         server.setHealthy(healthy);
         server.setLastHealthCheck(java.time.Instant.now());
+    }
+
+    @Override
+    public ServerInstance acquireServer(LoadBalancingStrategy strategy) {
+        lock.lock();
+
+        try {
+
+            ServerInstance server =
+                    strategy.selectServer(getHealthyServers());
+
+            System.out.println(server);
+            server.incrementConnections();
+
+            return server;
+
+        } finally {
+            lock.unlock();
+        }
     }
 }

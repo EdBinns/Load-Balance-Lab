@@ -16,7 +16,18 @@ public class RoundRobinStrategy implements LoadBalancingStrategy {
         if (servers.isEmpty()) {
             throw new IllegalArgumentException("Server list is empty");
         }
-        ServerInstance selectedServer = servers.get(currentIndex.getAndIncrement() % servers.size());
-        return selectedServer;
+
+        int current = currentIndex.getAndIncrement();
+        int index = current % servers.size();
+
+        System.out.printf(
+            "counter=%d index=%d size=%d server=%s%n",
+            current,
+            index,
+            servers.size(),
+            servers.get(index).getName()
+        );
+
+        return servers.get(index);
     }
 }

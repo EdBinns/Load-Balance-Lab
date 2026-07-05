@@ -45,19 +45,34 @@ public class ServerInstance {
         this.lastHealthCheck = lastHealthCheck;
     }
 
-    public AtomicInteger getActiveConnections() {
-        return activeConnections;
+    public int getActiveConnections() {
+        return activeConnections.get();
     }
 
     public void incrementConnections() {
-        activeConnections.incrementAndGet();
+        var newCount = activeConnections.incrementAndGet();
+        System.out.printf("[INC] %s -> %d%n", name, newCount);
     }
 
     public void decrementConnections() {
-        activeConnections.decrementAndGet();
+        var newCount = activeConnections.decrementAndGet();
+        System.out.printf("[DEC] %s -> %d%n", name, newCount);
     }
 
     public int getWeight() {
         return weight;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s hash=%d active=%d weight=%d healthy=%s lastHealthCheck=%s",
+                name,
+                System.identityHashCode(this),
+                activeConnections.get(),
+                weight,
+                healthy,
+                lastHealthCheck
+        );
     }
 }

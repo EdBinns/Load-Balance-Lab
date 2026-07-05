@@ -36,17 +36,13 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
         if (strategy == null) {
         throw new IllegalArgumentException(
-            "Unknown load balancing strategy: " + properties.getStrategy()
-        );
+            "Unknown load balancing strategy: " + properties.getStrategy());
         }
-        var server = strategy.selectServer(serverRegistry.getHealthyServers());
-
-        System.out.println("Selected server: " + server.getName() + " with URL: " + server.getUrl());
-        server.incrementConnections();
+        
+        var server = serverRegistry.acquireServer(strategy);
         var api = server.getUrl() + "/hello";
         
         try {
-            Thread.sleep(5000);
             return restClient.get(api);
         } finally {
              server.decrementConnections();
