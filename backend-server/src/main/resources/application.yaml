@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: backend-server
+
+app:
+  server-name: backend-server
