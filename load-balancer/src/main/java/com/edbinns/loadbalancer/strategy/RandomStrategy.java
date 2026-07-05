@@ -1,6 +1,7 @@
 package com.edbinns.loadbalancer.strategy;
 
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ public class RandomStrategy implements LoadBalancingStrategy {
         if (servers.isEmpty()) {
             throw new IllegalArgumentException("Server list is empty");
         }
-        int randomIndex = (int) (Math.random() * servers.size());
+        var randomIndex = new Random().nextInt(servers.size());
         return servers.get(randomIndex);
     }
 }
