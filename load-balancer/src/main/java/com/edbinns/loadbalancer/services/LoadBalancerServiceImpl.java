@@ -1,13 +1,12 @@
 package com.edbinns.loadbalancer.services;
 
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.edbinns.loadbalancer.api.RestClient;
-import com.edbinns.loadbalancer.models.ServerInstance;
+import com.edbinns.loadbalancer.config.LoadBalancerProperties;
+import com.edbinns.loadbalancer.servers.ServerRegistry;
 import com.edbinns.loadbalancer.strategy.LoadBalancingStrategy;
 
 @Service
@@ -15,28 +14,32 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     
     private final RestClient restClient;
     private final Map<String, LoadBalancingStrategy> strategies;
-    
-    @Value("${loadbalancer.strategy}")
-    private String currentStrategy;
-
-    private final List<ServerInstance> servers = List.of(
-    new ServerInstance("A", "http://localhost:8081"),
-    new ServerInstance("B", "http://localhost:8082"),
-    new ServerInstance("C", "http://localhost:8083"));
+    private final ServerRegistry serverRegistry;
+    private final LoadBalancerProperties properties;
     
    public LoadBalancerServiceImpl(
         RestClient restClient,
-        Map<String, LoadBalancingStrategy> strategies
+        Map<String, LoadBalancingStrategy> strategies,
+        ServerRegistry serverRegistry,
+        LoadBalancerProperties properties
     ) {
         this.restClient = restClient;
         this.strategies = strategies;
+        this.serverRegistry = serverRegistry;
+        this.properties = properties;
     }
         
     @Override
     public String forwardRequest() {
 
-        var strategy = strategies.get(currentStrategy);
-        var server = strategy.selectServer(servers);
+        var strategy = strategies.get(properties.getStrategy());
+
+        if (strategy == null) {
+        throw new IllegalArgumentException(
+            "Unknown load balancing strategy: " + properties.getStrategy()
+        );
+}
+        var server = strategy.selectServer(serverRegistry.getServers());
         var api = server.url() + "/hello";
         
         return restClient.get(api);
