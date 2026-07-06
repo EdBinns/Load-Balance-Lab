@@ -7,16 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.edbinns.loadbalancer.models.ServerInstance;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component("weightedRoundRobin")
 public class WeightRoundRobinStrategy implements LoadBalancingStrategy {
 
     @Override
-    public ServerInstance selectServer(List<ServerInstance> servers) {
-                
-        if (servers.isEmpty()) {
-            throw new IllegalStateException("No healthy servers available");
-        }
-
+    public ServerInstance selectServer(List<ServerInstance> servers, HttpServletRequest request) {                
         int totalWeight = servers.stream()
         .mapToInt(ServerInstance::getWeight)
         .sum();

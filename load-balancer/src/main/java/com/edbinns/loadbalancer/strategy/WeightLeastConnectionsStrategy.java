@@ -6,16 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.edbinns.loadbalancer.models.ServerInstance;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component("weightedLeastConnections")
 public class WeightLeastConnectionsStrategy implements LoadBalancingStrategy {
 
     @Override
-    public ServerInstance selectServer(List<ServerInstance> servers) {
-
-        if (servers.isEmpty()) {
-            throw new IllegalStateException("No healthy servers available");
-        }
-
+    public ServerInstance selectServer(List<ServerInstance> servers, HttpServletRequest request) {
       return servers.stream()
             .min((s1, s2) -> {
                 long left  = (long) s1.getActiveConnections() * s2.getWeight();

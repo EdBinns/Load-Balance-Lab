@@ -7,11 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.edbinns.loadbalancer.models.ServerInstance;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component("leastConnections")
 public class LeastConnectionsStrategy  implements LoadBalancingStrategy {
 
    @Override
-public ServerInstance selectServer(List<ServerInstance> servers) {
+public ServerInstance selectServer(List<ServerInstance> servers, HttpServletRequest request) {
 
     System.out.println("\n========== LEAST CONNECTIONS ==========");
 

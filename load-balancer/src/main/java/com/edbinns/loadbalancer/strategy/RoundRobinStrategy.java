@@ -7,16 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.edbinns.loadbalancer.models.ServerInstance;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Component("roundRobin")
 public class RoundRobinStrategy implements LoadBalancingStrategy {
     private final AtomicInteger currentIndex = new AtomicInteger(0);
 
     @Override
-    public ServerInstance selectServer(List<ServerInstance> servers) {
-        if (servers.isEmpty()) {
-            throw new IllegalArgumentException("Server list is empty");
-        }
-
+    public ServerInstance selectServer(List<ServerInstance> servers,HttpServletRequest request) {
         int current = currentIndex.getAndIncrement();
         int index = current % servers.size();
 
