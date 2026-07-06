@@ -9,6 +9,8 @@ import com.edbinns.loadbalancer.config.LoadBalancerProperties;
 import com.edbinns.loadbalancer.servers.ServerRegistry;
 import com.edbinns.loadbalancer.strategy.LoadBalancingStrategy;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class LoadBalancerServiceImpl implements LoadBalancerService {
     
@@ -30,7 +32,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
         
     @Override
-    public String forwardRequest() throws InterruptedException {
+    public String forwardRequest(HttpServletRequest request) throws InterruptedException {
 
         var strategy = strategies.get(properties.getStrategy());
 
@@ -39,7 +41,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             "Unknown load balancing strategy: " + properties.getStrategy());
         }
         
-        var server = serverRegistry.acquireServer(strategy);
+        var server = serverRegistry.acquireServer(strategy, request);
         var api = server.getUrl() + "/hello";
         
         try {

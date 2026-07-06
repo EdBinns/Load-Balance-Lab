@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.edbinns.loadbalancer.services.LoadBalancerService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 public class LoadBalancerController {
 
@@ -17,8 +19,8 @@ public class LoadBalancerController {
     }
 
     @GetMapping("/hello")
-    public Map<String, String> hello() throws InterruptedException {
-        return Map.of("message", loadBalancerService.forwardRequest());
+    public Map<String, String> hello(HttpServletRequest request) throws InterruptedException {
+        return Map.of("message", loadBalancerService.forwardRequest(request));
     }
 
     @GetMapping("/health")

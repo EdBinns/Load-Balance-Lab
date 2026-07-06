@@ -9,6 +9,8 @@ import com.edbinns.loadbalancer.config.LoadBalancerProperties;
 import com.edbinns.loadbalancer.models.ServerInstance;
 import com.edbinns.loadbalancer.strategy.LoadBalancingStrategy;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class InMemoryServerRegistry implements ServerRegistry {
     private final LoadBalancerProperties properties;
@@ -39,13 +41,16 @@ public class InMemoryServerRegistry implements ServerRegistry {
     }
 
     @Override
-    public ServerInstance acquireServer(LoadBalancingStrategy strategy) {
+    public ServerInstance acquireServer(LoadBalancingStrategy strategy, HttpServletRequest request) {
         lock.lock();
 
         try {
 
-            ServerInstance server =
-                    strategy.selectServer(getHealthyServers());
+            var servers = getHealthyServers();
+            if (servers.isEmpty()) {
+                throw new IllegalStateException("No healthy servers available");
+            }
+            ServerInstance server = strategy.selectServer(servers, request);
 
             System.out.println(server);
             server.incrementConnections();
