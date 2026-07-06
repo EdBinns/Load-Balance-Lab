@@ -3,17 +3,17 @@ spring:
     name: load-balancer
 
 loadbalancer:
-  strategy: leastConnections
+  strategy: weightedRoundRobin
 
   servers:
   - name: A
     url: http://localhost:8081
-    weight: 2
+    weight: 9
 
   - name: B
     url: http://localhost:8082
-    weight: 1
+    weight: 5
 
   - name: C
     url: http://localhost:8083
-    weight: 2
+    weight: 3
