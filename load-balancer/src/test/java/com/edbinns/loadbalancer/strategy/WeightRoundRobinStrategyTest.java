@@ -19,10 +19,10 @@ public class WeightRoundRobinStrategyTest {
 
     @Test
     void shouldReturnServersInRoundRobinOrderWhenWeightsAreEqual() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
-        List<ServerInstance> servers = List.of(a, b, c);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
+        var servers = List.of(a, b, c);
 
         assertEquals(a, strategy.selectServer(servers, null));
         assertEquals(b, strategy.selectServer(servers, null));
@@ -34,17 +34,17 @@ public class WeightRoundRobinStrategyTest {
 
     @Test
     void shouldDistributeSelectionsAccordingToWeight() {
-        ServerInstance a = new ServerInstance("A", "http://a", 5);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
-        List<ServerInstance> servers = List.of(a, b, c);
+        var a = new ServerInstance("A", "http://a", 5);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
+        var servers = List.of(a, b, c);
 
-        int countA = 0;
-        int countB = 0;
-        int countC = 0;
+        var countA = 0;
+        var countB = 0;
+        var countC = 0;
 
         for (int i = 0; i < 7; i++) {
-            ServerInstance selected = strategy.selectServer(servers, null);
+            var selected = strategy.selectServer(servers, null);
             if (selected == a) {
                 countA++;
             } else if (selected == b) {

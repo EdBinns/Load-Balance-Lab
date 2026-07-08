@@ -14,7 +14,7 @@ public class WeightRoundRobinStrategy implements LoadBalancingStrategy {
 
     @Override
     public ServerInstance selectServer(List<ServerInstance> servers, HttpServletRequest request) {                
-        int totalWeight = servers.stream()
+        var totalWeight = servers.stream()
         .mapToInt(ServerInstance::getWeight)
         .sum();
 
@@ -22,7 +22,7 @@ public class WeightRoundRobinStrategy implements LoadBalancingStrategy {
             server.addToCurrentWeight(server.getWeight());
         }
 
-        ServerInstance selected = servers.stream()
+        var selected = servers.stream()
         .max(Comparator.comparingInt(ServerInstance::getCurrentWeightValue))
         .orElseThrow();
 

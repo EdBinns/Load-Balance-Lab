@@ -9,7 +9,7 @@ class ServerInstanceTest {
 
     @Test
     void shouldTrackActiveConnections() {
-        ServerInstance server = new ServerInstance("A", "http://a", 1);
+        var server = new ServerInstance("A", "http://a", 1);
 
         assertEquals(0, server.getActiveConnections());
 
@@ -23,7 +23,7 @@ class ServerInstanceTest {
 
     @Test
     void shouldTrackHealthStatus() {
-        ServerInstance server = new ServerInstance("A", "http://a", 1);
+        var server = new ServerInstance("A", "http://a", 1);
 
         assertTrue(server.isHealthy());
 
@@ -33,7 +33,7 @@ class ServerInstanceTest {
 
     @Test
     void shouldTrackCurrentWeight() {
-        ServerInstance server = new ServerInstance("A", "http://a", 3);
+        var server = new ServerInstance("A", "http://a", 3);
 
         assertEquals(0, server.getCurrentWeightValue());
 

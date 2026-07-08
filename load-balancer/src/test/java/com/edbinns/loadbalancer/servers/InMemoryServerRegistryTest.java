@@ -53,9 +53,9 @@ class InMemoryServerRegistryTest {
 
     @Test
     void shouldAcquireServerAndIncrementConnections() {
-        RoundRobinStrategy strategy = new RoundRobinStrategy();
+        var strategy = new RoundRobinStrategy();
 
-        ServerInstance selected = registry.acquireServer(strategy, null);
+        var selected = registry.acquireServer(strategy, null);
 
         assertEquals(serverA, selected);
         assertEquals(1, serverA.getActiveConnections());

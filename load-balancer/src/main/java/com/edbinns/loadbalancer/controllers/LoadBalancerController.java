@@ -1,10 +1,11 @@
 package com.edbinns.loadbalancer.controllers;
 
-import java.util.Map;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.edbinns.loadbalancer.services.HealthCheckService;
 import com.edbinns.loadbalancer.services.LoadBalancerService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,19 +14,21 @@ import jakarta.servlet.http.HttpServletRequest;
 public class LoadBalancerController {
 
     private final LoadBalancerService loadBalancerService;
+    private final HealthCheckService healthCheckService;
 
-    public LoadBalancerController(LoadBalancerService loadBalancerService) {
+    public LoadBalancerController(LoadBalancerService loadBalancerService, HealthCheckService healthCheckService) {
         this.loadBalancerService = loadBalancerService;
+        this.healthCheckService = healthCheckService;
     }
 
-    @GetMapping("/hello")
-    public Map<String, String> hello(HttpServletRequest request) throws InterruptedException {
-        return Map.of("message", loadBalancerService.forwardRequest(request));
+    @RequestMapping("/**")
+    public ResponseEntity<?> proxy(HttpServletRequest request) throws InterruptedException {
+        return ResponseEntity.ok(loadBalancerService.forwardRequest(request));
     }
 
     @GetMapping("/health")
-    public String health() {
-        return "OK";
+    public ResponseEntity<?> health() {
+        return ResponseEntity.ok(healthCheckService.getHealthyServers());
     }
 }
 

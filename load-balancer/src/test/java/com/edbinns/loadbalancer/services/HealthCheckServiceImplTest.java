@@ -61,6 +61,35 @@ class HealthCheckServiceImplTest {
         assertFalse(serverA.isHealthy());
     }
 
+    @Test
+    void shouldReturnMappedDtosWhenServersArePresent() {
+        var result = healthCheckService.getHealthyServers();
+
+        assertEquals(1, result.size());
+        
+        var dto = result.get(0);
+        assertEquals("A", dto.getName() );
+        assertEquals("http://a", dto.getUrl());
+  
+        assertEquals(serverA.isHealthy(), dto.isHealthy());
+        assertEquals(serverA.getLastHealthCheck(), dto.getLastHealthCheck());
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenNoServersAreAvailable() {
+        var emptyProperties = new LoadBalancerProperties();
+        emptyProperties.setServers(List.of()); 
+        
+        var emptyRegistry = new InMemoryServerRegistry(emptyProperties);
+        var serviceWithNoServers = new HealthCheckServiceImpl(restClient, emptyRegistry);
+
+        var exception = org.junit.jupiter.api.Assertions.assertThrows(
+            RuntimeException.class, 
+            () -> serviceWithNoServers.getHealthyServers()
+        );
+
+        assertEquals("No servers instances are available to handle requests.", exception.getMessage());
+    }
     private static class StubRestClient extends RestClient {
 
         String lastStatusUrl;

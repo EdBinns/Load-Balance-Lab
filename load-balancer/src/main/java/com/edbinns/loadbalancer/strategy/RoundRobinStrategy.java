@@ -15,8 +15,8 @@ public class RoundRobinStrategy implements LoadBalancingStrategy {
 
     @Override
     public ServerInstance selectServer(List<ServerInstance> servers,HttpServletRequest request) {
-        int current = currentIndex.getAndIncrement();
-        int index = current % servers.size();
+        var current = currentIndex.getAndIncrement();
+        var index = current % servers.size();
 
         System.out.printf(
             "counter=%d index=%d size=%d server=%s%n",

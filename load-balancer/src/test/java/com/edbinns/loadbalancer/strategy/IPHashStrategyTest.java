@@ -20,53 +20,53 @@ public class IPHashStrategyTest {
 
     @Test
     void shouldReturnSameServerForSameIp() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
-        List<ServerInstance> servers = List.of(a, b, c);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
+        var servers = List.of(a, b, c);
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        var request = new MockHttpServletRequest();
         request.setRemoteAddr("192.168.1.100");
 
-        ServerInstance first = strategy.selectServer(servers, request);
-        ServerInstance second = strategy.selectServer(servers, request);
+        var first = strategy.selectServer(servers, request);
+        var second = strategy.selectServer(servers, request);
 
         assertEquals(first, second);
     }
 
     @Test
     void shouldUseForwardedForHeaderWhenPresent() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
-        List<ServerInstance> servers = List.of(a, b, c);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
+        var servers = List.of(a, b, c);
 
-        String forwardedIp = "203.0.113.50";
-        int expectedIndex = Math.abs(forwardedIp.hashCode()) % servers.size();
+        var forwardedIp = "203.0.113.50";
+        var expectedIndex = Math.abs(forwardedIp.hashCode()) % servers.size();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        var request = new MockHttpServletRequest();
         request.addHeader("X-Forwarded-For", forwardedIp);
         request.setRemoteAddr("10.0.0.1");
 
-        ServerInstance selected = strategy.selectServer(servers, request);
+        var selected = strategy.selectServer(servers, request);
 
         assertEquals(servers.get(expectedIndex), selected);
     }
 
     @Test
     void shouldUseRemoteAddrWhenForwardedForHeaderIsBlank() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        List<ServerInstance> servers = List.of(a, b);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var servers = List.of(a, b);
 
-        String remoteIp = "172.16.0.25";
-        int expectedIndex = Math.abs(remoteIp.hashCode()) % servers.size();
+        var remoteIp = "172.16.0.25";
+        var expectedIndex = Math.abs(remoteIp.hashCode()) % servers.size();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        var request = new MockHttpServletRequest();
         request.addHeader("X-Forwarded-For", "   ");
         request.setRemoteAddr(remoteIp);
 
-        ServerInstance selected = strategy.selectServer(servers, request);
+        var selected = strategy.selectServer(servers, request);
 
         assertEquals(servers.get(expectedIndex), selected);
     }

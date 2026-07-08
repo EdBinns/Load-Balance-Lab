@@ -19,13 +19,13 @@ public class RandomStrategyTest {
 
     @Test
     void shouldReturnServerFromList() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
-        List<ServerInstance> servers = List.of(a, b, c);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
+        var servers = List.of(a, b, c);
 
         for (int i = 0; i < 50; i++) {
-            ServerInstance selected = strategy.selectServer(servers, null);
+            var selected = strategy.selectServer(servers, null);
             assertTrue(servers.contains(selected));
         }
     }
