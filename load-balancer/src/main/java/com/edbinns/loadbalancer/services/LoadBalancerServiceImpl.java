@@ -3,6 +3,7 @@ package com.edbinns.loadbalancer.services;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.edbinns.loadbalancer.api.RestClient;
 import com.edbinns.loadbalancer.config.LoadBalancerProperties;
@@ -42,10 +43,16 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         }
         
         var server = serverRegistry.acquireServer(strategy, request);
-        var api = server.getUrl() + "/hello";
+        var api = UriComponentsBuilder.fromUriString(server.getUrl())
+         .path(request.getRequestURI())
+         .query(request.getQueryString())
+         .build(true)
+         .toUriString();
+        
+         System.out.println("Forwarding request to: " + api + " with method: " + request.getMethod());
         
         try {
-            return restClient.get(api);
+            return restClient.send(api, request).body();
         } finally {
              server.decrementConnections();
         }

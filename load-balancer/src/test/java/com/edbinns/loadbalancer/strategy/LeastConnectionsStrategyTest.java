@@ -19,9 +19,9 @@ public class LeastConnectionsStrategyTest {
 
     @Test
     void shouldReturnServerWithLeastConnections() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
 
         for (int i = 0; i < 5; i++) {
             a.incrementConnections();
@@ -33,7 +33,7 @@ public class LeastConnectionsStrategyTest {
             c.incrementConnections();
         }
 
-        ServerInstance selected = strategy.selectServer(List.of(a, b, c), null);
+        var selected = strategy.selectServer(List.of(a, b, c), null);
 
         assertEquals(b, selected);
     }

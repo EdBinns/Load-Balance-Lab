@@ -19,8 +19,8 @@ public class WeightLeastConnectionsStrategyTest {
 
     @Test
     void shouldReturnServerWithLowestWeightedConnectionScore() {
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 2);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 2);
 
         for (int i = 0; i < 5; i++) {
             a.incrementConnections();
@@ -29,22 +29,22 @@ public class WeightLeastConnectionsStrategyTest {
             b.incrementConnections();
         }
 
-        ServerInstance selected = strategy.selectServer(List.of(a, b), null);
+        var selected = strategy.selectServer(List.of(a, b), null);
 
         assertEquals(b, selected);
     }
 
     @Test
     void shouldFavorHigherWeightServerWhenConnectionsAreEqual() {
-        ServerInstance lowWeight = new ServerInstance("low", "http://low", 1);
-        ServerInstance highWeight = new ServerInstance("high", "http://high", 4);
+        var lowWeight = new ServerInstance("low", "http://low", 1);
+        var highWeight = new ServerInstance("high", "http://high", 4);
 
         for (int i = 0; i < 8; i++) {
             lowWeight.incrementConnections();
             highWeight.incrementConnections();
         }
 
-        ServerInstance selected = strategy.selectServer(List.of(lowWeight, highWeight), null);
+        var selected = strategy.selectServer(List.of(lowWeight, highWeight), null);
 
         assertEquals(highWeight, selected);
     }

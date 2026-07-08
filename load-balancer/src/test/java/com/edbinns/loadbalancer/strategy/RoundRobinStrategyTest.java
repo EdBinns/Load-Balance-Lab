@@ -19,11 +19,11 @@ public class RoundRobinStrategyTest {
     @Test
     void shouldReturnServersInRoundRobinOrder() {
 
-        ServerInstance a = new ServerInstance("A", "http://a", 1);
-        ServerInstance b = new ServerInstance("B", "http://b", 1);
-        ServerInstance c = new ServerInstance("C", "http://c", 1);
+        var a = new ServerInstance("A", "http://a", 1);
+        var b = new ServerInstance("B", "http://b", 1);
+        var c = new ServerInstance("C", "http://c", 1);
 
-        List<ServerInstance> servers = List.of(a, b, c);
+        var servers = List.of(a, b, c);
 
         assertEquals(a, strategy.selectServer(servers, null));
         assertEquals(b, strategy.selectServer(servers, null));
