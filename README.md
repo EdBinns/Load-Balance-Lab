@@ -4,7 +4,7 @@ A lab for experimenting with different load balancing strategies, built from scr
 
 ## What does the project do?
 
-The `load-balancer` receives HTTP requests on `/hello`, picks a healthy backend instance according to the configured strategy, forwards the request, and returns the response to the client. Meanwhile, a periodic health check monitors every registered server and removes it from the pool if it stops responding.
+The `load-balancer` receives HTTP requests on `/**`, picks a healthy backend instance according to the configured strategy, forwards the request, and returns the response to the client. Meanwhile, a periodic health check monitors every registered server and removes it from the pool if it stops responding.
 
 The `backend-server` is a test app that simulates different response times depending on the instance name (A, B, or C), which makes it easy to visually observe how each strategy distributes the load.
 
@@ -21,7 +21,7 @@ load-balancer-lab/
 
 ### `load-balancer`
 
-- **`LoadBalancerController`** — exposes `GET /hello` (forwards to the chosen backend) and `GET /health`.
+- **`LoadBalancerController`** — exposes `/**` (forwards to the chosen backend) and `GET /health`.
 - **`LoadBalancerServiceImpl`** — orchestrates the flow: picks the active strategy (by name, via Spring), asks the `ServerRegistry` for a server, forwards the request with `RestClient`, and releases the connection when done.
 - **`ServerRegistry` / `InMemoryServerRegistry`** — keeps the list of configured servers, filters the healthy ones, and uses a lock so server selection is thread-safe.
 - **`HealthCheckServiceImpl`** — every 5 seconds (`@Scheduled`) hits `/health` on each server and updates its status (`UP`/`DOWN`).
