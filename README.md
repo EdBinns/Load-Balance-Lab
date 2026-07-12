@@ -4,7 +4,7 @@ A lab for experimenting with different load balancing strategies, built from scr
 
 ## What does the project do?
 
-The `load-balancer` receives HTTP requests on `/**`, picks a healthy backend instance according to the configured strategy, forwards the request, and returns the response to the client. Meanwhile, a periodic health check monitors every registered server and removes it from the pool if it stops responding.
+The `load-balancer` acts as a reverse proxy on `/**`: it accepts any HTTP method, picks a healthy backend instance according to the configured strategy, forwards the request (path, query string, body, and selected headers), and returns the response to the client. Meanwhile, a periodic health check monitors every registered server and removes it from the pool if it stops responding.
 
 The `backend-server` is a test app that simulates different response times depending on the instance name (A, B, or C), which makes it easy to visually observe how each strategy distributes the load.
 
@@ -21,10 +21,12 @@ load-balancer-lab/
 
 ### `load-balancer`
 
-- **`LoadBalancerController`** — exposes `/**` (forwards to the chosen backend) and `GET /health`.
-- **`LoadBalancerServiceImpl`** — orchestrates the flow: picks the active strategy (by name, via Spring), asks the `ServerRegistry` for a server, forwards the request with `RestClient`, and releases the connection when done.
+- **`LoadBalancerController`** — `@RequestMapping("/**")` proxies any HTTP method to the chosen backend; `GET /health` returns the status of every registered server as a list of `ServiceInstanceDTO`.
+- **`LoadBalancerServiceImpl`** — orchestrates the flow: picks the active strategy (by name, via Spring), asks the `ServerRegistry` for a server, builds the target URL by appending the incoming path and query string to the backend base URL, forwards the request with `RestClient`, and releases the connection when done.
+- **`RestClient`** — uses Java's `HttpClient` to relay the full incoming request: HTTP method, body, and a whitelist of headers (`Authorization`, `Content-Type`, `Accept`, `User-Agent`, `Cookie`, etc.). It also sets `X-Forwarded-For`, `X-Forwarded-Proto`, and `X-Forwarded-Host` so backends (and strategies like `ipHash`) can see the original client context.
 - **`ServerRegistry` / `InMemoryServerRegistry`** — keeps the list of configured servers, filters the healthy ones, and uses a lock so server selection is thread-safe.
-- **`HealthCheckServiceImpl`** — every 5 seconds (`@Scheduled`) hits `/health` on each server and updates its status (`UP`/`DOWN`).
+- **`HealthCheckServiceImpl`** — every 5 seconds (`@Scheduled`) hits `/health` on each server and updates its status (`UP`/`DOWN`). Exposes `getHealthyServers()` for the `/health` endpoint.
+- **`ServiceInstanceDTO`** — snapshot of a registered server: name, URL, active connections, health flag, and timestamp of the last health check.
 - **`LoadBalancingStrategy`** — common interface for all strategies (`selectServer(servers, request)`), implemented as Spring `@Component` beans and injected as `Map<String, LoadBalancingStrategy>` (the key is the bean name).
 - **`LoadBalancerProperties`** — maps the `loadbalancer` section of `application.yaml`: which strategy to use and the list of servers (name, URL, weight).
 
@@ -35,16 +37,17 @@ A minimal app with a single controller (`HelloController`) that responds on `/he
 ### Request flow
 
 ```
-client → load-balancer:8080/hello
+client → load-balancer:8080/hello?foo=bar  (any HTTP method)
               │
               ├─ HealthCheckService keeps the list of healthy servers up to date
               ├─ LoadBalancingStrategy picks one of those servers
               ├─ ServerRegistry increments its active connections
-              ├─ RestClient forwards the request to the chosen backend
+              ├─ LoadBalancerServiceImpl builds backend URL (base + path + query)
+              ├─ RestClient relays method, body, headers, and X-Forwarded-* to backend
               └─ active connections are decremented once it responds
                               │
                               ▼
-                 backend-server:808X/hello (A, B, or C)
+                 backend-server:808X/hello?foo=bar (A, B, or C)
 ```
 
 ## Load balancing strategies
@@ -88,7 +91,7 @@ To try a different strategy, change the `strategy` value and restart the load ba
 
 ### 1. Requirements
 
-- Java 17+ (or whichever version the `pom.xml` files require)
+- Java 21
 - Python 3 (for the scripts in `scripts/`, dependency: `requests`)
 
 ### 2. Build the test backend
@@ -139,8 +142,39 @@ python3 scripts/test_lb.py
 
 The script fires 30 requests (10 concurrent) spread across 5 simulated client IPs and prints which server responded, the status, and the time for each one.
 
+Check load balancer health (returns every registered server and its status):
+
+```bash
+curl http://localhost:8080/health
+```
+
+Example response:
+
+```json
+[
+  {
+    "name": "A",
+    "url": "http://localhost:8081",
+    "activeConnections": 0,
+    "healthy": true,
+    "lastHealthCheck": "2026-07-11T22:00:00Z"
+  }
+]
+```
+
+### 6. Run unit tests
+
+```bash
+cd load-balancer
+./mvnw test
+```
+
+Tests cover the controller, service layer, server registry, health checks, and every load balancing strategy.
+
 ## Notes
 
+- The load balancer proxies the full request URI to the chosen backend — e.g. `GET /hello` on port 8080 becomes `GET http://localhost:808X/hello` on the selected instance.
 - The health check runs every 5 seconds and marks any server whose `/health` doesn't respond `2xx` as unavailable.
+- `GET /health` on the load balancer itself is **not** proxied; it returns the status of all configured backends.
 - If all servers are down, the load balancer responds with an error (`IllegalStateException: No healthy servers available`).
 - The strategies are stateless with respect to the server registry except for their own internal counters (round robin index, accumulated weights), so adding/removing servers at runtime is not supported — it requires a restart.
